@@ -3,6 +3,7 @@
 import asyncio
 from configs import Config
 from handlers import linkshort
+from handlers.remove_word import rmw
 from pyrogram import Client
 from pyrogram.types import (
     Message,
@@ -39,11 +40,13 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
         message_cap =""
         i = 1
         for message in (await bot.get_messages(chat_id=editable.chat.id, message_ids=message_ids)):
-            sent_message = await forward_to_channel(bot, message, editable)
+            sent_message = await message.copy(Config.DB_CHANNEL)
             if sent_message is None:
                 continue
             message_ids_str += f"{str(sent_message.id)} "
-            message_cap += f"<b>{i}</b>: {sent_message.caption}\n\n"
+            cap01 = await rmw(sent_message.caption)
+            await bot.edit_message_caption(Config.DB_CHANNEL,sent_message.id,f"{cap01}")
+            message_cap += f"<b>{i}</b>: {cap01}\n\n"
             i += 1
             await asyncio.sleep(2)
         SaveMessage = await bot.send_message(
@@ -93,8 +96,10 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
 
 async def save_media_in_channel(bot: Client, editable: Message, message: Message):
     try:
-        forwarded_msg = await message.forward(Config.DB_CHANNEL)
-        cap = forwarded_msg.caption
+        forwarded_msg = await message.copy(Config.DB_CHANNEL)
+        cap01 = forwarded_msg.caption
+        cap = await rmw(cap01)
+        await bot.edit_message_caption(Config.DB_CHANNEL,forwarded_msg.id,f"{cap}")
         file_er_id = str(forwarded_msg.id)
         await forwarded_msg.reply_text(
             f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!",
