@@ -110,14 +110,17 @@ async def save_media_in_channel(bot: Client, editable: Message, message: Message
         else:
             cap = "file don't have any caption 😟"
         file_er_id = str(forwarded_msg.id)           
-        await forwarded_msg.reply_text(
-            f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!",
-            disable_web_page_preview=True)
+#         await forwarded_msg.reply_text(
+#             f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!",
+#             disable_web_page_preview=True)
         if Config.SHORTNER_API_LINK and Config.SHORTNER_API:
             share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}")
         else:
             share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
         #share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
+        await forwarded_msg.reply_text(
+            f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!",
+            disable_web_page_preview=True,reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Open Link", url=share_link)]]))
         await editable.edit(
             #"**Your File Stored in my Database!**\n\n"
             f"Here is the Permanent Link of your file: {share_link} \n\n"
