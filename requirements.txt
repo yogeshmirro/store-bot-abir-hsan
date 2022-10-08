@@ -5,3 +5,5 @@ aiofiles
 dnspython
 psutil
 requests
+pymongo
+enums
