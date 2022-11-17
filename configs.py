@@ -1,7 +1,10 @@
 # (c) @AbirHasan2005
 
 import os
+from os import environ
 
+PORT = os.environ.get("PORT","8080")
+TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "4"))
 
 class Config(object):
 	API_ID = int(os.environ.get("API_ID","18860540"))
