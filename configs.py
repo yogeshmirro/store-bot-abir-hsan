@@ -10,7 +10,7 @@ class Config(object):
 	API_ID = int(os.environ.get("API_ID","18860540"))
 	API_HASH = os.environ.get("API_HASH","22dd2ad1706199438ab3474e85c9afab")
 	BOT_TOKEN = os.environ.get("BOT_TOKEN","5355558998:AAFehbjIvbfZTubH8b_0XlBKlu17M0Se4PY")
-	BOT_USERNAME = os.environ.get("BOT_USERNAME","@tgfilesstorebot")
+	BOT_USERNAME = os.environ.get("BOT_USERNAME","tgfilesstorebot")
 	DB_CHANNEL = int(os.environ.get("DB_CHANNEL","-1001777759879"))
 	BOT_OWNER = int(os.environ.get("BOT_OWNER","5123176772"))
 	DATABASE_URL = os.environ.get("DATABASE_URL","mongodb+srv://Test4:Test4@cluster0.w2gkj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
