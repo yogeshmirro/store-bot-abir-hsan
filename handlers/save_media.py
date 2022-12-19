@@ -97,6 +97,7 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
             await bot.send_photo(Config.BOT_OWNER,thumb_path,f"Here is the Permanent Link of your files: {share_link} \n\n"
             f"<b><i>Just Click the link to get your files!</i></b>\n\n"
             f"<b>your files name are:👇</b> \n\n <i>{message_cap}</i>")
+            await rm(f"{Config.DOWNLOAD_DIR}/")
         except:
             pass
     except Exception as err:
@@ -156,6 +157,7 @@ async def save_media_in_channel(bot: Client, editable: Message, message: Message
             await bot.send_photo(Config.BOT_OWNER,thumb_path,f"Here is the Permanent Link of your file: {share_link} \n\n"
             "<i><b>Just Click the link to get your file!</b></i> \n\n"
             f"<b>your file name is 👇</b>:\n\n<i>{cap}</i>")
+            await rm(f"{Config.DOWNLOAD_DIR}/")
         except:
             pass
     except FloodWait as sl:
