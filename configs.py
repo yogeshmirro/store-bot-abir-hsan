@@ -10,8 +10,8 @@ class Config(object):
 	DOWNLOAD_DIR = os.environ.get("DOWNLOAD_DIR", "./downloads")
 	API_ID = int(os.environ.get("API_ID","18860540"))
 	API_HASH = os.environ.get("API_HASH","22dd2ad1706199438ab3474e85c9afab")
-	BOT_TOKEN = os.environ.get("BOT_TOKEN","5446345385:AAFm_jIJMV2903-cGX6cgyHUWZc9_xvl7Bk")
-	BOT_USERNAME = os.environ.get("BOT_USERNAME","Gcghhhjbot")
+	BOT_TOKEN = os.environ.get("BOT_TOKEN","5897109438:AAHvunKRlH4B_-ouc5vwH9fkEH0zQC7M1Lw")
+	BOT_USERNAME = os.environ.get("BOT_USERNAME","tgfilesstorebot")
 	DB_CHANNEL = int(os.environ.get("DB_CHANNEL","-1001777759879"))
 	BOT_OWNER = int(os.environ.get("BOT_OWNER","5123176772"))
 	DATABASE_URL = os.environ.get("DATABASE_URL","mongodb+srv://file-to-link:file-to-link@fille-to-link.9fm5uz3.mongodb.net/?retryWrites=true&w=majority")
@@ -25,7 +25,7 @@ class Config(object):
 	SHORTNER_API_LINK = os.environ.get("SHORTNER_API_LINK", None)
 	SHORTNER_API = os.environ.get("SHORTNER_API", None)
 	REMOVE_WORD = list(set(str(x) for x in os.environ.get("REMOVE_WORD","mkvCinemas.mkv Haafiz Chapter").split()))
-	SEND_PHOTO = os.environ.get("SEND_PHOTO",None)
+	SEND_PHOTO = os.environ.get("SEND_PHOTO",-1001866881204)
 	ABOUT_BOT_TEXT = f"""
 This is Permanent Files and text Store Bot!
 Send me any file or text, I will save it in my Database. Also works for channel. Add me to channel as Admin with Edit Permission, I will add Save Uploaded File in Channel & add Sharable Button Link.
