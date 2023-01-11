@@ -14,7 +14,7 @@ from pyrogram.types import (
 from pyrogram.errors import FloodWait
 from handlers.helpers import str_to_b64
 
-
+ADD = f"📣{Config.ADD_DETAIL}📣" if Config.ADD_DETAIL else None
 async def forward_to_channel(bot: Client, message: Message, editable: Message):
     try:
         __SENT = await message.copy(Config.DB_CHANNEL)
@@ -97,7 +97,7 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
             await bot.send_photo(Config.SEND_PHOTO,thumb_path,f"Here is the Permanent Link of your files: <a href={share_link}>Download Link</a> \n\n"
             f"<b><i>Just Click the link to get your files!</i></b>\n\n"
             f"<b>your files name are:👇</b> \n\n <i>{message_cap}</i>\n"
-            (f"📣{Config.ADD_DETAIL}📣 if Config.ADD_DETAIL else None"))
+            ADD)
             await rm(f"{Config.DOWNLOAD_DIR}/")
         except:
             pass
