@@ -97,7 +97,7 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
             await bot.send_photo(Config.SEND_PHOTO,thumb_path,f"Here is the Permanent Link of your files: <a href={share_link}>Download Link</a> \n\n"
             f"<b><i>Just Click the link to get your files!</i></b>\n\n"
             f"<b>your files name are:👇</b> \n\n <i>{message_cap}</i>\n"
-            (f"📣{Config.ADD_DETAIL}📣" if Config.ADD_DETAIL else None))
+            (f"📣{Config.ADD_DETAIL}📣 if Config.ADD_DETAIL else None"))
             await rm(f"{Config.DOWNLOAD_DIR}/")
         except:
             pass
