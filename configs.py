@@ -26,7 +26,7 @@ class Config(object):
 	SHORTNER_API = os.environ.get("SHORTNER_API", None)
 	REMOVE_WORD = list(set(str(x) for x in os.environ.get("REMOVE_WORD","mkvCinemas.mkv Haafiz Chapter").split()))
 	SEND_PHOTO = os.environ.get("SEND_PHOTO",-1001866881204)
-	ADD_DETAIL = os.environ.get("ADD_DETAIL",None)
+	ADD_DETAIL = os.environ.get("ADD_DETAIL","")
 	ABOUT_BOT_TEXT = f"""
 This is Permanent Files and text Store Bot!
 Send me any file or text, I will save it in my Database. Also works for channel. Add me to channel as Admin with Edit Permission, I will add Save Uploaded File in Channel & add Sharable Button Link.
