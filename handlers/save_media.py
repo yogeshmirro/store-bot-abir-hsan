@@ -14,7 +14,7 @@ from pyrogram.types import (
 from pyrogram.errors import FloodWait
 from handlers.helpers import str_to_b64
 
-ADD = f"📣{Config.ADD_DETAIL}📣" if Config.ADD_DETAIL else None
+ADD = f"📣{Config.ADD_DETAIL}📣" if Config.ADD_DETAIL else ""
 async def forward_to_channel(bot: Client, message: Message, editable: Message):
     try:
         __SENT = await message.copy(Config.DB_CHANNEL)
