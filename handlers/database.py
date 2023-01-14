@@ -16,6 +16,7 @@ class Database:
         return dict(
             id=id,
             join_date=datetime.date.today().isoformat(),
+            verify_date=datetime.date.today().isoformat(),
             ban_status=dict(
                 is_banned=False,
                 ban_duration=0,
@@ -31,6 +32,14 @@ class Database:
     async def is_user_exist(self, id):
         user = await self.col.find_one({'id': int(id)})
         return True if user else False
+    
+    async def updates(self , id):
+        updat = datetime.date.today().isoformat()
+        await self.col.update_one({'id': id}, {'$set': {'verify_date': updat}})
+    
+    async def verify_status(self,id):
+        status = await self.col.find_one({'id' : int(id)})
+        return status.get('verify_date')
 
     async def total_users_count(self):
         count = await self.col.count_documents({})
