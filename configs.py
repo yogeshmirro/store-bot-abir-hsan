@@ -22,6 +22,7 @@ class Config(object):
   )
   VERIFY_KEY = os.environ.get("VERIFY_KEY", "MjM5MQ==").split()#multiple key separted by space . example = https://t.me/tgfilesstorebot?start=storebot_MjM5MQ== 👈 in this link verify key is "MjM5MQ=="
   VERIFY_LINK = os.environ.get("VERIFY_LINK","https://t.me/Files_storesbot?start=storebot_MjM5MQ==").split()#multiple verification link separted by space. these links can be shorted links which is all related to VERIFY_KEY 
+  EARNING = os.environ.get("EARNING",False)
   UPDATES_CHANNEL = os.environ.get("UPDATES_CHANNEL", "")
   LOG_CHANNEL = os.environ.get("LOG_CHANNEL", "-1001777759879")
   BANNED_USERS = set(
@@ -36,7 +37,10 @@ class Config(object):
     os.environ.get("OTHER_USERS_CAN_SAVE_FILE", True))
   SHORTNER_API_LINK = os.environ.get("SHORTNER_API_LINK", None)
   SHORTNER_API = os.environ.get("SHORTNER_API", None)
-  REMOVE_WORD = os.environ.get("REMOVE_WORD","mkvCinemas.mkv|Haafiz Chapter")#word that u want to remove from caption , must be separted by '|'
+  REMOVE_WORD = list(
+    set(
+      str(x) for x in os.environ.get("REMOVE_WORD",
+                                     "mkvCinemas.mkv Haafiz Chapter").split()))
   SEND_PHOTO = os.environ.get("SEND_PHOTO", -1001866881204)
   ADD_DETAIL = os.environ.get("ADD_DETAIL", "")
   ABOUT_BOT_TEXT = f"""
