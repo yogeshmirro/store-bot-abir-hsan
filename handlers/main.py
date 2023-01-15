@@ -1,6 +1,9 @@
 # (c) @AbirHasan2005
 
 import os
+import secrets
+from datetime import date
+from datetime import datetime
 from bot import Bot
 from configs import Config
 import asyncio
@@ -48,7 +51,6 @@ async def _(bot: Client, cmd: Message):
     
 @Bot.on_message(filters.command("start") & filters.private)
 async def start(bot: Client, cmd: Message):
-
     if cmd.from_user.id in Config.BANNED_USERS:
         await cmd.reply_text("Sorry, You are banned.")
         return
@@ -56,7 +58,6 @@ async def start(bot: Client, cmd: Message):
         back = await handle_force_sub(bot, cmd)
         if back == 400:
             return
-    
     usr_cmd = cmd.text.split("_", 1)[-1]
     if usr_cmd == "/start":
         await add_user_to_database(bot, cmd)
@@ -77,32 +78,60 @@ async def start(bot: Client, cmd: Message):
             )
         )
     else:
-        try:
+        if Config.EARNING:
+            date_format = "%Y-%m-%d"
+            current_date = datetime.strptime(date.today().isoformat(),date_format)
+            user_date = datetime.strptime(await db.verify_status(cmd.from_user.id),date_format)
+            diff = (current_date-user_date).days
+            if usr_cmd in Config.VERIFY_KEY:
+                await db.updates(cmd.from_user.id)
+                await bot.send_message(cmd.from_user.id,"💥Verification Complete💥")
+                return
+            if diff<=3:
+                try:
+                    try:
+                        file_id = int(b64_to_str(usr_cmd).split("_")[-1])
+                    except (Error, UnicodeDecodeError):
+                        file_id = int(usr_cmd.split("_")[-1])
+                    GetMessage = await bot.get_messages(chat_id=Config.DB_CHANNEL, message_ids=file_id)
+                    message_ids = []
+                    if GetMessage.text:
+                        message_ids = GetMessage.text.split(" ")
+                        _response_msg = await cmd.reply_text(
+                        text=f"**Total Files:** `{len(message_ids)}`",
+                        quote=True,
+                        disable_web_page_preview=True
+                        )
+                    else:
+                        message_ids.append(int(GetMessage.id))
+                    for i in range(len(message_ids)):
+                        await send_media_and_reply(bot, user_id=cmd.from_user.id, file_id=int(message_ids[i]))
+                except Exception as err:
+                    await cmd.reply_text(f"Something went wrong!\n\n**Error:** `{err}`")
+            else:
+                random_link = secrets.choice(Config.VERIFY_LINK)
+                await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{random_link}\n🥁<i>Once you verify, your verification valid till next 3 days</i>🥁")
+        else:
             try:
-                file_id = int(b64_to_str(usr_cmd).split("_")[-1])
-            except (Error, UnicodeDecodeError):
-                file_id = int(usr_cmd.split("_")[-1])
-            GetMessage = await bot.get_messages(chat_id=Config.DB_CHANNEL, message_ids=file_id)
-            
-            message_ids = []
-            if GetMessage.reply_markup:
-                message_ids = GetMessage.text.split(" ")
-                _response_msg = await cmd.reply_text(
+                try:
+                    file_id = int(b64_to_str(usr_cmd).split("_")[-1])
+                except (Error, UnicodeDecodeError):
+                    file_id = int(usr_cmd.split("_")[-1])
+                GetMessage = await bot.get_messages(chat_id=Config.DB_CHANNEL, message_ids=file_id)
+                message_ids = []
+                if GetMessage.text:
+                    message_ids = GetMessage.text.split(" ")
+                    _response_msg = await cmd.reply_text(
                     text=f"**Total Files:** `{len(message_ids)}`",
                     quote=True,
                     disable_web_page_preview=True
-                )
-            else:
-                message_ids.append(int(GetMessage.id))
-                _response_msg = await cmd.reply_text(
-                text=f"**Total Files:** `{len(message_ids)}`",
-                    quote=True,
-                    disable_web_page_preview=True)
-            for i in range(len(message_ids)):
-                await send_media_and_reply(bot, user_id=cmd.from_user.id, file_id=int(message_ids[i]))
-        except Exception as err:
-            await cmd.reply_text(f"Something went wrong!\n\n**Error:** `{err}`")
-
+                    )
+                else:
+                    message_ids.append(int(GetMessage.id))
+                for i in range(len(message_ids)):
+                    await send_media_and_reply(bot, user_id=cmd.from_user.id, file_id=int(message_ids[i]))
+            except Exception as err:
+                await cmd.reply_text(f"Something went wrong!\n\n**Error:** `{err}`")
 
 @Bot.on_message((filters.user(Config.BOT_OWNER) & filters.incoming) & ~filters.chat(Config.DB_CHANNEL) & ~filters.command(['start','broadcast','clear_batch','ban_user','unban_user','banned_users','status']))
 async def main(bot: Client, message: Message):
