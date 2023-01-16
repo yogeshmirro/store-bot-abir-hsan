@@ -1,6 +1,7 @@
 # (c) @AbirHasan2005
 
 import os
+from handlers import linkshort
 import secrets
 from datetime import date
 from datetime import datetime
@@ -79,14 +80,31 @@ async def start(bot: Client, cmd: Message):
         )
     else:
         if Config.EARNING:
+            
             date_format = "%Y-%m-%d"
             current_date = datetime.strptime(date.today().isoformat(),date_format)
             user_date = datetime.strptime(await db.verify_status(cmd.from_user.id),date_format)
             diff = (current_date-user_date).days
+            
             if usr_cmd in Config.VERIFY_KEY:
-                await db.updates(cmd.from_user.id)
-                await bot.send_message(cmd.from_user.id,"💥Verification Complete💥")
-                return
+                key = await db.get_verify_key(cmd.from_user.id)
+                if user_cmd==key:
+                    await db.update_verify_date(cmd.from_user.id)
+                    await db.update_verify_key(cmd.from_user.id)
+                    await bot.send_message(cmd.from_user.id,"💥Verification Complete💥")
+                    return
+                else:
+                    if Config.TOGGLE:
+                        user_key = await db.get_verify_key(cmd.from_user.id)
+                        to_be_short = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_"+user_key
+                        shorted_link = await linkshort.Short(to_be_short)
+                        await bot.send_message(cmd.from_user.id,f"This Verification Link Expire🚫\nVerify With your new Link👉👉\n{shorted_link})
+                        return
+                    
+                    else:
+                        shorted_link = await db.toggle(cmd.from_user.id)
+                        await bot.send_message(cmd.from_user.id,f"This Verification Link Expire🚫\nVerify With your new Link👉👉👉\n{shorted_link}")
+                        return
             if diff<=3:
                 try:
                     try:
@@ -109,8 +127,16 @@ async def start(bot: Client, cmd: Message):
                 except Exception as err:
                     await cmd.reply_text(f"Something went wrong!\n\n**Error:** `{err}`")
             else:
-                random_link = secrets.choice(Config.VERIFY_LINK)
-                await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{random_link}\n🥁<i>Once you verify, your verification valid till next 3 days</i>🥁")
+                if Config.TOGGLE:
+                    user_key = await db.get_verify_key(cmd.from_user.id)
+                    to_be_short = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_"+user_key
+                    shorted_link = await linkshort.Short(to_be_short)
+                    await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{shorted_link}\n🥁<i>Once you verify, your verification valid till next 3 days</i>🥁")
+                else:
+                    shorted_link = await db.toggle(cmd.from_user.id)
+                    await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{shorted_link}\n🥁<i>Once you verify, your verification valid till next 3 days</i>🥁")
+                #random_link = secrets.choice(Config.VERIFY_LINK)
+                #await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{random_link}\n🥁<i>Once you verify, your verification valid till next 3 days</i>🥁")
         else:
             try:
                 try:
@@ -174,11 +200,11 @@ async def main(bot: Client, message: Message):
         try:
             forwarded_msg = await message.forward(Config.DB_CHANNEL)
             file_er_id = str(forwarded_msg.id)
-            if Config.SHORTNER_API_LINK and Config.SHORTNER_API:
-                share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}")
-            else:
-                share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
-            #share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
+            # if Config.SHORTNER_API_LINK and Config.SHORTNER_API:
+            #     share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}")
+            # else:
+            #     share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
+            share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
             CH_edit = await bot.edit_message_reply_markup(message.chat.id, message.id,
                                                           reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
                                                               "Get Sharable Link", url=share_link)]]))
