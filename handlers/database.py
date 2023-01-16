@@ -34,6 +34,12 @@ class Database:
     async def toggle(self,id):
         user = await self.col.find_one({'id' : int(id)})
         user_key = user.get('verify_key')
+        if user_key in Config.VERIFY_KEY:
+            pass
+        else:
+            verify_key=secrets.choice(Config.VERIFY_KEY)
+            await self.col.update_one({'id': id}, {'$set' : {'verify_key': verify_key}})
+            user_key = user.get('verify_key')
         pairs = list(zip(Config.VERIFY_KEY,Config.VERIFY_LINK))
         for i in pairs:
             if user_key in i:
