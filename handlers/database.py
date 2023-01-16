@@ -53,7 +53,14 @@ class Database:
     
     async def get_verify_key(self,id):
         status = await self.col.find_one({'id' : int(id)})
-        return status.get('verify_key')
+        user_key = status.get('verify_key')
+        if user_key in Config.VERIFY_KEY:
+            pass
+        else:
+            verify_key=secrets.choice(Config.VERIFY_KEY)
+            await self.col.update_one({'id': id}, {'$set' : {'verify_key': verify_key}})
+            user_key = status.get('verify_key')
+        return user_key
     
     async def update_verify_key(self,id):
         updates = secrets.choice(Config.VERIFY_KEY)
