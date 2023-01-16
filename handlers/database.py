@@ -1,6 +1,7 @@
 # (c) @AbirHasan2005
 
 import datetime
+import secrets
 import motor.motor_asyncio
 from configs import Config
 
@@ -17,6 +18,7 @@ class Database:
             id=id,
             join_date=datetime.date.today().isoformat(),
             verify_date=datetime.date.today().isoformat(),
+            verify_key=secrets.choice(Config.VERIFY_KEY)
             ban_status=dict(
                 is_banned=False,
                 ban_duration=0,
@@ -29,13 +31,31 @@ class Database:
         user = self.new_user(id)
         await self.col.insert_one(user)
 
+    async def toggle(self,id):
+        user = await self.col.find_one({'id' : int(id)})
+        user_key = user.get('verify_key')
+        pairs = list(zip(Config.VERIFY_KEY,Config.VERIFY_LINK))
+        for i in pairs:
+            if user_key in i:
+                key,link = i
+        return link
+        
+    
     async def is_user_exist(self, id):
         user = await self.col.find_one({'id': int(id)})
         return True if user else False
     
-    async def updates(self , id):
-        updat = datetime.date.today().isoformat()
-        await self.col.update_one({'id': id}, {'$set': {'verify_date': updat}})
+    async def get_verify_key(self,id):
+        status = await self.col.find_one({'id' : int(id)})
+        return status.get('verify_key')
+    
+    async def update_verify_key(self,id):
+        updates = secrets.choice(Config.VERIFY_KEY)
+        await self.col.update_one({'id': id}, {'$set' : {'verify_key': updates}})
+    
+    async def update_verify_date(self , id):
+        updates = datetime.date.today().isoformat()
+        await self.col.update_one({'id': id}, {'$set': {'verify_date': updates}})
     
     async def verify_status(self,id):
         status = await self.col.find_one({'id' : int(id)})
