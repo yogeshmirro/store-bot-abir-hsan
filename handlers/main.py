@@ -85,10 +85,10 @@ async def start(bot: Client, cmd: Message):
             current_date = datetime.strptime(date.today().isoformat(),date_format)
             user_date = datetime.strptime(await db.verify_status(cmd.from_user.id),date_format)
             diff = (current_date-user_date).days
-            
+        
             if usr_cmd in Config.VERIFY_KEY:
                 key = await db.get_verify_key(cmd.from_user.id)
-                if user_cmd==key:
+                if usr_cmd==key:
                     await db.update_verify_date(cmd.from_user.id)
                     await db.update_verify_key(cmd.from_user.id)
                     await bot.send_message(cmd.from_user.id,"💥Verification Complete💥")
@@ -98,7 +98,6 @@ async def start(bot: Client, cmd: Message):
                         user_key = await db.get_verify_key(cmd.from_user.id)
                         to_be_short = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_"+user_key
                         shorted_link = await linkshort.Short(to_be_short)
-                        print(to_be_short)
                         await bot.send_message(cmd.from_user.id,f"This Verification Link Expire🚫\nVerify With your new Link👉👉\n{shorted_link}")
                         return
                     
@@ -131,7 +130,9 @@ async def start(bot: Client, cmd: Message):
                 if Config.TOGGLE:
                     user_key = await db.get_verify_key(cmd.from_user.id)
                     to_be_short = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_"+user_key
-                    shorted_link = await linkshort.Short(to_be_short)
+                    
+                    shorted_link = await linkshort.Short(f"{to_be_short}")
+                    
                     await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{shorted_link}\n🥁<i>Once you verify, your verification valid till next 3 days</i>🥁")
                 else:
                     shorted_link = await db.toggle(cmd.from_user.id)
