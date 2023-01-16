@@ -70,11 +70,11 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
                 InlineKeyboardButton("Delete Batch", callback_data="closeMessage")
             ]])
         )
-        if Config.SHORTNER_API_LINK and Config.SHORTNER_API:
-            share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}")
-        else:
-            share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}"
-        #share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}"
+        # if Config.SHORTNER_API_LINK and Config.SHORTNER_API:
+        #     share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}")
+        # else:
+        #     share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}"
+        share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}"
         await editable.edit(
             #f"**Batch Files Stored in my Database!**\n\n
             f"Here is the Permanent Link of your files: {share_link} \n\n"
@@ -98,7 +98,7 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
             f"<b><i>Just Click the link to get your files!</i></b>\n\n"
             f"<b>your files name are:👇</b> \n\n <i>{message_cap}</i>\n"
             f"{Config.ADD_DETAIL}")
-            await rm(f"{Config.DOWNLOAD_DIR}/")
+            await rm_dir(f"{Config.DOWNLOAD_DIR}/")
         except:
             pass
     except Exception as err:
@@ -134,11 +134,11 @@ async def save_media_in_channel(bot: Client, editable: Message, message: Message
 #         await forwarded_msg.reply_text(
 #             f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!",
 #             disable_web_page_preview=True)
-        if Config.SHORTNER_API_LINK and Config.SHORTNER_API:
-            share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}")
-        else:
-            share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
-        #share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
+        # if Config.SHORTNER_API_LINK and Config.SHORTNER_API:
+        #     share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}")
+        # else:
+        #     share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
+        share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
         await forwarded_msg.reply_text(
             f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!",
             disable_web_page_preview=True,reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Open Link", url=share_link)]]))
@@ -159,7 +159,7 @@ async def save_media_in_channel(bot: Client, editable: Message, message: Message
             "<i><b>Just Click the link to get your file!</b></i> \n\n"
             f"<b>your file name is 👇</b>:\n\n<i>{cap}</i>\n"
             f"{Config.ADD_DETAIL}")
-            await rm(f"{Config.DOWNLOAD_DIR}/")
+            await rm_dir(f"{Config.DOWNLOAD_DIR}/")
         except:
             pass
     except FloodWait as sl:
