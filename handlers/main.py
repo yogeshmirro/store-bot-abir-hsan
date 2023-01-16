@@ -98,6 +98,7 @@ async def start(bot: Client, cmd: Message):
                         user_key = await db.get_verify_key(cmd.from_user.id)
                         to_be_short = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_"+user_key
                         shorted_link = await linkshort.Short(to_be_short)
+                        print(to_be_short)
                         await bot.send_message(cmd.from_user.id,f"This Verification Link Expire🚫\nVerify With your new Link👉👉\n{shorted_link}")
                         return
                     
