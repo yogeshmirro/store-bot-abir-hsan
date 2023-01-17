@@ -102,7 +102,8 @@ async def start(bot: Client, cmd: Message):
                         return
                     
                     else:
-                        shorted_link = await db.toggle(cmd.from_user.id)
+                        user_key = await db.toggle(cmd.from_user.id)
+                        shorted_link = Config.VERIFY_LINK[Config.VERIFY_KEY.index('user_key')]
                         await bot.send_message(cmd.from_user.id,f"This Verification Link Expire🚫\nVerify With your new Link👉👉👉\n{shorted_link}")
                         return
             if diff<=3:
@@ -135,7 +136,8 @@ async def start(bot: Client, cmd: Message):
                     
                     await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{shorted_link}\n🥁<i>Once you verify, your verification valid till next 3 days</i>🥁")
                 else:
-                    shorted_link = await db.toggle(cmd.from_user.id)
+                    user_key = await db.toggle(cmd.from_user.id)
+                    shorted_link = Config.VERIFY_LINK[Config.VERIFY_KEY.index('user_key')]
                     await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{shorted_link}\n🥁<i>Once you verify, your verification valid till next 3 days</i>🥁")
                 #random_link = secrets.choice(Config.VERIFY_LINK)
                 #await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{random_link}\n🥁<i>Once you verify, your verification valid till next 3 days</i>🥁")
