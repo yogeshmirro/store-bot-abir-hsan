@@ -37,7 +37,7 @@ class Database:
         if user_key in Config.VERIFY_KEY:
             pass
         else:
-            verify_key = secrets.choice(Config.verify_key)
+            verify_key = secrets.choice(Config.VERIFY_KEY)
             await self.col.update_one({'id': id}, {'$set' :{'verify_key': verify_key}})
             user_key = user.get('verify_key')
         return user_key
