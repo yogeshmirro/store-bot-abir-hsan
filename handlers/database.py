@@ -37,14 +37,18 @@ class Database:
         if user_key in Config.VERIFY_KEY:
             pass
         else:
-            verify_key=secrets.choice(Config.VERIFY_KEY)
-            await self.col.update_one({'id': id}, {'$set' : {'verify_key': verify_key}})
+            verify_key = secrets.choice(Config.verify_key)
+            await self.col.update_one({'id': id}, {'$set' :{'verify_key': verify_key}})
             user_key = user.get('verify_key')
-        pairs = list(zip(Config.VERIFY_KEY,Config.VERIFY_LINK))
-        for i in pairs:
-            if user_key in i:
-                key,link = i
-        return link
+        return user_key
+        #     verify_key=secrets.choice(Config.VERIFY_KEY)
+        #     await self.col.update_one({'id': id}, {'$set' : {'verify_key': verify_key}})
+        #     user_key = user.get('verify_key')
+        # pairs = list(zip(Config.VERIFY_KEY,Config.VERIFY_LINK))
+        # for i in pairs:
+        #     if user_key in i:
+        #         key,link = i
+        # return link
         
     
     async def is_user_exist(self, id):
