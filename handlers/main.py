@@ -80,33 +80,21 @@ async def start(bot: Client, cmd: Message):
         )
     else:
         if Config.EARNING:
-            
             date_format = "%Y-%m-%d"
             current_date = datetime.strptime(date.today().isoformat(),date_format)
             user_date = datetime.strptime(await db.verify_status(cmd.from_user.id),date_format)
             diff = (current_date-user_date).days
-        
-            if usr_cmd in Config.VERIFY_KEY:
-                key = await db.get_verify_key(cmd.from_user.id)
-                if usr_cmd==key:
+            user_db_key = await db.get_verify_key(cmd.from_user.id)
+            if usr_cmd == user_db_key:
+                try:
                     await db.update_verify_date(cmd.from_user.id)
                     await db.update_verify_key(cmd.from_user.id)
                     await bot.send_message(cmd.from_user.id,"💥Verification Complete💥")
                     return
-                else:
-                    if Config.TOGGLE:
-                        user_key = await db.get_verify_key(cmd.from_user.id)
-                        to_be_short = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_"+user_key
-                        shorted_link = await linkshort.Short(to_be_short)
-                        await bot.send_message(cmd.from_user.id,f"This Verification Link Expire🚫\nVerify With your new Link👉👉\n{shorted_link}")
-                        return
-                    
-                    else:
-                        user_key = await db.toggle(cmd.from_user.id)
-                        shorted_link = Config.VERIFY_LINK[Config.VERIFY_KEY.index(user_key)]
-                        await bot.send_message(cmd.from_user.id,f"This Verification Link Expire🚫\nVerify With your new Link👉👉👉\n{shorted_link}")
-                        return
-            if diff<=3:
+                except Exception as err:
+                    await cmd.reply_text(f"Something went wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
+                    return
+            if diff<=int(Config.VERIFY_DURATION):
                 try:
                     try:
                         file_id = int(b64_to_str(usr_cmd).split("_")[-1])
@@ -126,21 +114,21 @@ async def start(bot: Client, cmd: Message):
                     for i in range(len(message_ids)):
                         await send_media_and_reply(bot, user_id=cmd.from_user.id, file_id=int(message_ids[i]))
                 except Exception as err:
-                    await cmd.reply_text(f"Something went wrong!\n\n**Error:** `{err}`")
+                    await cmd.reply_text(f"Something went wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
             else:
-                if Config.TOGGLE:
-                    user_key = await db.get_verify_key(cmd.from_user.id)
-                    to_be_short = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_"+user_key
+                try:
+                    if Config.VERIFY_KEY:
+                        user_key = await db.get_verify_key(cmd.from_user.id)
+                        shorted_link = Config.VERIFY_LINK[Config.VERIFY_KEY.index(user_key)]
+                        await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{shorted_link}\n🥁<i>Once you verify, your verification valid till next {Config.VERIFY_DURATION} days</i>🥁\nHow To Verify👉👉{Config.HOW_TO_VERIFY_LINK}")
                     
-                    shorted_link = await linkshort.Short(f"{to_be_short}")
-                    
-                    await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{shorted_link}\n🥁<i>Once you verify, your verification valid till next 3 days</i>🥁")
-                else:
-                    user_key = await db.toggle(cmd.from_user.id)
-                    shorted_link = Config.VERIFY_LINK[Config.VERIFY_KEY.index(user_key)]
-                    await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{shorted_link}\n🥁<i>Once you verify, your verification valid till next 3 days</i>🥁")
-                #random_link = secrets.choice(Config.VERIFY_LINK)
-                #await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{random_link}\n🥁<i>Once you verify, your verification valid till next 3 days</i>🥁")
+                    else:
+                        user_key = await db.get_verify_key(cmd.from_user.id)
+                        to_be_short = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_"+user_key
+                        shorted_link = await linkshort.Short(f"{to_be_short}")
+                        await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{shorted_link}\n🥁<i>Once you verify, your verification valid till next {Config.VERIFY_DURATION} days</i>🥁\nHow To Verify👉👉{Config.HOW_TO_VERIFY_LINK}")
+                except Exception as err:
+                    await cmd.reply_text(f"Something went wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
         else:
             try:
                 try:
