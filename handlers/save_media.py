@@ -48,9 +48,10 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
             message_ids_str += f"{str(sent_message.id)} "
             try:
                 if not thumbnail_id:
-                    thumbnail_id+=message.video.thumbs[0].file_id
-                    thumb_path = await bot.download_media(thumbnail_id,f"{Config.DOWNLOAD_DIR}/")
-            except:
+                    if message.video.thumbs:
+                        thumbnail_id+=message.video.thumbs[0].file_id
+            except Exception as err:
+                print(err)
                 pass
             cap01 = sent_message.caption
             if cap01:
@@ -70,16 +71,17 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
                 InlineKeyboardButton("Delete Batch", callback_data="closeMessage")
             ]])
         )
-        # if Config.SHORTNER_API_LINK and Config.SHORTNER_API:
-        #     share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}")
-        # else:
-        #     share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}"
-        share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}"
+        if Config.SHORT_SINGLE_LINK:
+            share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}")
+        else:
+            share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}"
+        org_share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}"
         await editable.edit(
             #f"**Batch Files Stored in my Database!**\n\n
             f"Here is the Permanent Link of your files: {share_link} \n\n"
             f"<b><i>Just Click the link to get your files!</i></b>\n\n"
-            f"<b>your files name are:👇</b> \n\n <i>{message_cap}</i>",
+            f"<b>your files name are:👇</b> \n\n <i>{message_cap}</i>"
+            f"{Config.ADD_DETAIL}",
             reply_markup=InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Open Link", url=share_link)],
                  [InlineKeyboardButton("Bots Channel", url="https://t.me/"),
@@ -89,18 +91,21 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
         )
         await bot.send_message(
             chat_id=int(Config.LOG_CHANNEL),
-            text=f"#BATCH_SAVE:\n\n[{editable.reply_to_message.from_user.first_name}](tg://user?id={editable.reply_to_message.from_user.id}) Got Batch Link!",
+            text=f"#BATCH_SAVE:\n\n[{editable.reply_to_message.from_user.first_name}](tg://user?id={editable.reply_to_message.from_user.id}) Got Batch Link!\nLink 👉👉👉{share_link}",
             disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Open Link", url=share_link)]])
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Open Link", url=org_share_link)]])
         )
-        try:
-            await bot.send_photo(Config.SEND_PHOTO,thumb_path,f"Here is the Permanent Link of your files: <a href={share_link}>Download Link</a> \n\n"
-            f"<b><i>Just Click the link to get your files!</i></b>\n\n"
-            f"<b>your files name are:👇</b> \n\n <i>{message_cap}</i>\n"
-            f"{Config.ADD_DETAIL}")
-            await rm_dir(f"{Config.DOWNLOAD_DIR}/")
-        except:
-            pass
+        if Config.SEND_PHOTO:
+            try:
+                thumb_path = await bot.download_media(thumbnail_id,f"{Config.DOWNLOAD_DIR}/")
+                await bot.send_photo(int(Config.SEND_PHOTO),thumb_path,f"Here is the Permanent Link of your files: <a href={share_link}>Download Link</a> \n\n"
+                f"<b><i>Just Click the link to get your files!</i></b>\n\n"
+                f"<b>your files name are:👇</b> \n\n <i>{message_cap}</i>\n"
+                f"{Config.ADD_DETAIL}")
+                await rm.rm_dir(f"{Config.DOWNLOAD_DIR}/")
+            except Exception as err:
+                print(err)
+                pass
     except Exception as err:
         await editable.edit(f"Something Went Wrong!\n\n**Error:** `{err}`")
         await bot.send_message(
@@ -119,10 +124,6 @@ async def save_media_in_channel(bot: Client, editable: Message, message: Message
     try:
         forwarded_msg = await message.copy(Config.DB_CHANNEL)
         cap01 = forwarded_msg.caption
-        try:
-            thumb_path = await bot.download_media(message.video.thumbs[0].file_id,f"{Config.DOWNLOAD_DIR}/") if message.video.thumbs else None
-        except:
-            pass
         #print(message.video.thumbs[0].file_id)
         if cap01:
             cap = await rmw(cap01)
@@ -134,19 +135,20 @@ async def save_media_in_channel(bot: Client, editable: Message, message: Message
 #         await forwarded_msg.reply_text(
 #             f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!",
 #             disable_web_page_preview=True)
-        # if Config.SHORTNER_API_LINK and Config.SHORTNER_API:
-        #     share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}")
-        # else:
-        #     share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
-        share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
+        if Config.SHORT_SINGLE_LINK:
+            share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}")
+        else:
+            share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
+        org_share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
         await forwarded_msg.reply_text(
-            f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!",
-            disable_web_page_preview=True,reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Open Link", url=share_link)]]))
+            f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!\nLink 👉👉👉{share_link}",
+            disable_web_page_preview=True,reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Open Link", url=org_share_link)]]))
         await editable.edit(
             #"**Your File Stored in my Database!**\n\n"
             f"Here is the Permanent Link of your file: {share_link} \n\n"
             "<i><b>Just Click the link to get your file!</b></i> \n\n"
-            f"<b>your file name is 👇</b>:\n\n<i>{cap}</i>",
+            f"<b>your file name is 👇</b>:\n\n<i>{cap}</i>"
+            f"{Config.ADD_DETAIL}",
             reply_markup=InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Open Link", url=share_link)],
                  [InlineKeyboardButton("Bots Channel", url="https://t.me/"),
@@ -154,14 +156,18 @@ async def save_media_in_channel(bot: Client, editable: Message, message: Message
             ),
             disable_web_page_preview=True
         )
-        try:
-            await bot.send_photo(Config.SEND_PHOTO,thumb_path,f"Here is the Permanent Link of your file: <a href={share_link}>Download Link</a> \n\n"
-            "<i><b>Just Click the link to get your file!</b></i> \n\n"
-            f"<b>your file name is 👇</b>:\n\n<i>{cap}</i>\n"
-            f"{Config.ADD_DETAIL}")
-            await rm_dir(f"{Config.DOWNLOAD_DIR}/")
-        except:
-            pass
+        if Config.SEND_PHOTO:
+            if message.video.thumbs:
+                try:
+                    thumb_path = await bot.download_media(message.video.thumbs[0].file_id,f"{Config.DOWNLOAD_DIR}/")
+                    await bot.send_photo(int(Config.SEND_PHOTO),thumb_path,f"Here is the Permanent Link of your file: <a href={share_link}>Download Link</a> \n\n"
+                    "<i><b>Just Click the link to get your file!</b></i> \n\n"
+                    f"<b>your file name is 👇</b>:\n\n<i>{cap}</i>\n"
+                    f"{Config.ADD_DETAIL}")
+                    await rm.rm_dir(f"{Config.DOWNLOAD_DIR}/")
+                except Exception as err:
+                    print(err)
+                    pass
     except FloodWait as sl:
         if sl.value > 45:
             print(f"Sleep of {sl.value}s caused by FloodWait ...")
