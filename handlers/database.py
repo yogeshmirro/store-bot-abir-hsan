@@ -4,8 +4,8 @@ import datetime
 import secrets
 import motor.motor_asyncio
 from configs import Config
-
-
+import string
+N = 6
 class Database:
 
     def __init__(self, uri, database_name):
@@ -18,7 +18,7 @@ class Database:
             id=id,
             join_date=datetime.date.today().isoformat(),
             verify_date=datetime.date.today().isoformat(),
-            verify_key=secrets.choice(Config.VERIFY_KEY),
+            verify_key=secrets.choice(Config.VERIFY_KEY) if Config.VERIFY_KEY else "".join(secrets.choice(string.ascii_uppercase+string.digits+string.ascii_lowercase) for i in range(N)),
             ban_status=dict(
                 is_banned=False,
                 ban_duration=0,
@@ -30,26 +30,6 @@ class Database:
     async def add_user(self, id):
         user = self.new_user(id)
         await self.col.insert_one(user)
-
-    async def toggle(self,id):
-        user = await self.col.find_one({'id' : int(id)})
-        user_key = user.get('verify_key')
-        if user_key in Config.VERIFY_KEY:
-            pass
-        else:
-            verify_key = secrets.choice(Config.VERIFY_KEY)
-            await self.col.update_one({'id': id}, {'$set' :{'verify_key': verify_key}})
-            user_key = user.get('verify_key')
-        return user_key
-        #     verify_key=secrets.choice(Config.VERIFY_KEY)
-        #     await self.col.update_one({'id': id}, {'$set' : {'verify_key': verify_key}})
-        #     user_key = user.get('verify_key')
-        # pairs = list(zip(Config.VERIFY_KEY,Config.VERIFY_LINK))
-        # for i in pairs:
-        #     if user_key in i:
-        #         key,link = i
-        # return link
-        
     
     async def is_user_exist(self, id):
         user = await self.col.find_one({'id': int(id)})
@@ -58,17 +38,22 @@ class Database:
     async def get_verify_key(self,id):
         status = await self.col.find_one({'id' : int(id)})
         user_key = status.get('verify_key')
-        if user_key in Config.VERIFY_KEY:
-            pass
-        else:
-            verify_key=secrets.choice(Config.VERIFY_KEY)
-            await self.col.update_one({'id': id}, {'$set' : {'verify_key': verify_key}})
-            user_key = status.get('verify_key')
+        if Config.VERIFY_KEY:
+            if user_key in Config.VERIFY_KEY:
+                pass
+            else:
+                verify_key=secrets.choice(Config.VERIFY_KEY)
+                await self.col.update_one({'id': id}, {'$set' : {'verify_key': verify_key}})
+                user_key = status.get('verify_key')
         return user_key
     
     async def update_verify_key(self,id):
-        updates = secrets.choice(Config.VERIFY_KEY)
-        await self.col.update_one({'id': id}, {'$set' : {'verify_key': updates}})
+        if Config.VERIFY_KEY:
+            updates = secrets.choice(Config.VERIFY_KEY)
+            await self.col.update_one({'id': id}, {'$set' : {'verify_key': updates}})
+        else:
+            updates = "".join(secrets.choice(string.ascii_uppercase+string.digits+string.ascii_lowercase) for i in range(N))
+            await self.col.update_one({'id': id}, {'$set' : {'verify_key': updates}})
     
     async def update_verify_date(self , id):
         updates = datetime.date.today().isoformat()
