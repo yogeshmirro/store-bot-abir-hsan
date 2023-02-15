@@ -137,7 +137,7 @@ async def start(bot: Client, cmd: Message):
                     file_id = int(usr_cmd.split("_")[-1])
                 GetMessage = await bot.get_messages(chat_id=Config.DB_CHANNEL, message_ids=file_id)
                 message_ids = []
-                if GetMessage.text:
+                if GetMessage.reply_markup:
                     message_ids = GetMessage.text.split(" ")
                     _response_msg = await cmd.reply_text(
                     text=f"**Total Files:** `{len(message_ids)}`",
