@@ -21,10 +21,10 @@ from handlers.MultiChannel import get_db_channel
 
 async def media_forward(bot: Client, user_id: int, file_id: int, chat_id: int):
     try:
-        if Config.FORWARD_AS_COPY is True:
+        if Config.FORWARD_AS_COPY=="True":
             return await bot.copy_message(chat_id=user_id, from_chat_id=chat_id,
                                           message_id=file_id)
-        elif Config.FORWARD_AS_COPY is False:
+        elif Config.FORWARD_AS_COPY=="False":
             return await bot.forward_messages(chat_id=user_id, from_chat_id=chat_id,
                                               message_ids=file_id)
     except FloodWait as e:
