@@ -84,6 +84,12 @@ async def start(bot: Client, cmd: Message):
         for i in DBChannelDict:
             if value == DBChannelDict[i]:
                 DB_CHANNEL = int(i)
+                break
+            else:
+                DB_CHANNEL = None
+        if DB_CHANNEL is None:
+            await cmd.reply_text("**You Give Me Wrong Link👎**\nPlz Give Me Correct Link🤗")
+            return
         if Config.EARNING:
             date_format = "%Y-%m-%d"
             current_date = datetime.strptime(date.today().isoformat(),date_format)
