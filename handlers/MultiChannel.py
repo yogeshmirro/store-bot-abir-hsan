@@ -10,3 +10,11 @@ async def change_db_channel(channel_id):
 async def get_db_indentity():
     db_channel = await get_db_channel()
     return DBChannelDict[str(db_channel)]
+async def current_db_channel(value):
+    for i in DBChannelDict:
+        if value == DBChannelDict[i]:
+            C_DB_CHANNEL = int(i)
+            break
+        else:
+            C_DB_CHANNEL = None
+    return C_DB_CHANNEL
