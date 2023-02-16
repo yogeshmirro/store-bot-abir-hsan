@@ -43,7 +43,7 @@ from handlers.save_media import (
     save_media_in_channel,
     save_batch_media_in_channel
 )
-
+from handlers.MultiChannel import change_db_channel,get_db_dict,get_db_channel,get_db_indentity
 MediaList = {}
 
 @Bot.on_message(filters.private)
@@ -79,28 +79,50 @@ async def start(bot: Client, cmd: Message):
             )
         )
     else:
+        value = (cmd.text).split("_",1)[0].split()[-1]
+        DBChannelDict = await get_db_dict()
+        for i in DBChannelDict:
+            if value == DBChannelDict[i]:
+                DB_CHANNEL = int(i)
         if Config.EARNING:
             date_format = "%Y-%m-%d"
             current_date = datetime.strptime(date.today().isoformat(),date_format)
             user_date = datetime.strptime(await db.verify_status(cmd.from_user.id),date_format)
             diff = (current_date-user_date).days
             user_db_key = await db.get_verify_key(cmd.from_user.id)
-            if usr_cmd == user_db_key:
-                try:
-                    await db.update_verify_date(cmd.from_user.id)
-                    await db.update_verify_key(cmd.from_user.id)
-                    await bot.send_message(cmd.from_user.id,"💥Verification Complete💥")
-                    return
-                except Exception as err:
-                    await cmd.reply_text(f"Something went wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
-                    return
+            if value=="verifylink":
+                if usr_cmd == user_db_key:
+                    try:
+                        await db.update_verify_date(cmd.from_user.id)
+                        await db.update_verify_key(cmd.from_user.id)
+                        await bot.send_message(cmd.from_user.id,"💥Verification Complete💥")
+                        return
+                    except Exception as err:
+                        await cmd.reply_text(f"Something went wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
+                        return
+                else:
+                    try:
+                        if Config.VERIFY_KEY:
+                            user_key = await db.get_verify_key(cmd.from_user.id)
+                            shorted_link = Config.VERIFY_LINK[Config.VERIFY_KEY.index(user_key)]
+                            await bot.send_message(cmd.from_user.id,f"<b>This Verification Link Expired🚫\nPlz Verify by This New Link👉👉</b>\n{shorted_link}\n🥁<i>Once You Verify, Your Verification Valid Till Next {Config.VERIFY_DURATION} Days</i>🥁\nHow To Verify👉👉{Config.HOW_TO_VERIFY_LINK}")
+                            return
+                        else:
+                            user_key = await db.get_verify_key(cmd.from_user.id)
+                            to_be_short = f"https://t.me/{Config.BOT_USERNAME}?start=verifylink_"+user_key
+                            shorted_link = await linkshort.Short(f"{to_be_short}")
+                            await bot.send_message(cmd.from_user.id,f"<b>This Verification Link Expired🚫\nPlz Verify by This New Link👉👉</b>\n{shorted_link}\n🥁<i>Once You Verify, Your Verification Valid Till Next {Config.VERIFY_DURATION} Days</i>🥁\nHow To Verify👉👉{Config.HOW_TO_VERIFY_LINK}")
+                            return
+                    except Exception as err:
+                        await cmd.reply_text(f"Something went wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
+                        return
             if diff<=int(Config.VERIFY_DURATION):
                 try:
                     try:
                         file_id = int(b64_to_str(usr_cmd).split("_")[-1])
                     except (Error, UnicodeDecodeError):
                         file_id = int(usr_cmd.split("_")[-1])
-                    GetMessage = await bot.get_messages(chat_id=Config.DB_CHANNEL, message_ids=file_id)
+                    GetMessage = await bot.get_messages(chat_id=DB_CHANNEL, message_ids=file_id)
                     message_ids = []
                     if GetMessage.text:
                         message_ids = GetMessage.text.split(" ")
@@ -124,7 +146,7 @@ async def start(bot: Client, cmd: Message):
                     
                     else:
                         user_key = await db.get_verify_key(cmd.from_user.id)
-                        to_be_short = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_"+user_key
+                        to_be_short = f"https://t.me/{Config.BOT_USERNAME}?start=verifylink_"+user_key
                         shorted_link = await linkshort.Short(f"{to_be_short}")
                         await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{shorted_link}\n🥁<i>Once you verify, your verification valid till next {Config.VERIFY_DURATION} days</i>🥁\nHow To Verify👉👉{Config.HOW_TO_VERIFY_LINK}")
                 except Exception as err:
@@ -135,7 +157,7 @@ async def start(bot: Client, cmd: Message):
                     file_id = int(b64_to_str(usr_cmd).split("_")[-1])
                 except (Error, UnicodeDecodeError):
                     file_id = int(usr_cmd.split("_")[-1])
-                GetMessage = await bot.get_messages(chat_id=Config.DB_CHANNEL, message_ids=file_id)
+                GetMessage = await bot.get_messages(chat_id=DB_CHANNEL, message_ids=file_id)
                 message_ids = []
                 if GetMessage.reply_markup:
                     message_ids = GetMessage.text.split(" ")
@@ -147,13 +169,14 @@ async def start(bot: Client, cmd: Message):
                 else:
                     message_ids.append(int(GetMessage.id))
                 for i in range(len(message_ids)):
-                    await send_media_and_reply(bot, user_id=cmd.from_user.id, file_id=int(message_ids[i]))
+                    await send_media_and_reply(bot, user_id=cmd.from_user.id, file_id=int(message_ids[i]), chat_id = DB_CHANNEL)
             except Exception as err:
                 await cmd.reply_text(f"Something went wrong!\n\n**Error:** `{err}`")
 
-@Bot.on_message((filters.user(Config.BOT_OWNER) & filters.incoming) & ~filters.chat(Config.DB_CHANNEL) & ~filters.command(['start','broadcast','clear_batch','ban_user','unban_user','banned_users','status']))
+@Bot.on_message((filters.user(Config.BOT_OWNER) & filters.incoming) & ~filters.chat(Config.DB_CHANNELS) & ~filters.command(['start','broadcast','clear_batch','ban_user','unban_user','banned_users','status','change_db_channel']))
 async def main(bot: Client, message: Message):
-
+    DB_CHANNEL = await get_db_channel()
+    DB_Identity = await get_db_indentity()
     if message.chat.type == enums.ChatType.PRIVATE:
 
         await add_user_to_database(bot, message)
@@ -190,12 +213,12 @@ async def main(bot: Client, message: Message):
             pass
 
         try:
-            forwarded_msg = await message.forward(Config.DB_CHANNEL)
+            forwarded_msg = await message.forward(DB_CHANNEL)
             file_er_id = str(forwarded_msg.id)
             if Config.SHORT_SINGLE_LINK:
-                share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}")
+                share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(file_er_id)}")
             else:
-                share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
+                share_link = f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(file_er_id)}"
             #share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
             CH_edit = await bot.edit_message_reply_markup(message.chat.id, message.id,
                                                           reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
@@ -280,7 +303,6 @@ async def ban(c: Client, m: Message):
             quote=True
         )
 
-
 @Bot.on_message(filters.private & filters.command("unban_user") & filters.user(Config.BOT_OWNER))
 async def unban(c: Client, m: Message):
 
@@ -350,11 +372,25 @@ async def clear_user_batch(bot: Client, m: Message):
     MediaList[f"{str(m.from_user.id)}"] = []
     await m.reply_text("Cleared your batch files successfully!")
 
-
+@Bot.on_message(filters.private & filters.command("change_db_channel") & filters.user(Config.BOT_OWNER))
+async def change_channels(c: Client, m: Message):
+    DB_CHANNEL = await get_db_channel()
+    btn = [[InlineKeyboardButton(text=f"{i}",callback_data=f"change_channel#{i}")] for i in Config.DB_CHANNELS]
+    await m.reply_text(
+        f"Selected DB_CHANNEL is --- {DB_CHANNEL}\n**You have following DB Channels Which are Given Below👇👇👇👇**",
+        disable_web_page_preview=True,
+        reply_markup=InlineKeyboardMarkup(btn)
+    )
+@Bot.on_callback_query(filters.regex('^change'))
+async def change_channel(bot: Client , cmd: CallbackQuery):
+    waste,channel_id = cmd.data.split("#")
+    await change_db_channel(channel_id)
+    await cmd.message.edit(f"Now Your DB CHANNEL is-- **{channel_id}**")
 @Bot.on_callback_query()
 async def button(bot: Client, cmd: CallbackQuery):
 
     cb_data = cmd.data
+    
     if "aboutbot" in cb_data:
         await cmd.message.edit(
             Config.ABOUT_BOT_TEXT,
