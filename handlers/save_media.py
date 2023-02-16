@@ -73,7 +73,7 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
                 InlineKeyboardButton("Delete Batch", callback_data="closeMessage")
             ]])
         )
-        if Config.SHORT_SINGLE_LINK:
+        if Config.SHORT_SINGLE_LINK=="True":
             share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(str(SaveMessage.id))}")
         else:
             share_link = f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(str(SaveMessage.id))}"
@@ -97,7 +97,7 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Open Link", url=org_share_link)]])
         )
-        if Config.SEND_PHOTO:
+        if Config.SEND_PHOTO and thumbnail_id:
             try:
                 thumb_path = await bot.download_media(thumbnail_id,f"{Config.DOWNLOAD_DIR}/")
                 await bot.send_photo(int(Config.SEND_PHOTO),thumb_path,f"Here is the Permanent Link of your files: <a href={share_link}>Download Link</a> \n\n"
@@ -139,7 +139,7 @@ async def save_media_in_channel(bot: Client, editable: Message, message: Message
 #         await forwarded_msg.reply_text(
 #             f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!",
 #             disable_web_page_preview=True)
-        if Config.SHORT_SINGLE_LINK:
+        if Config.SHORT_SINGLE_LINK=="True":
             share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(file_er_id)}")
         else:
             share_link = f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(file_er_id)}"
