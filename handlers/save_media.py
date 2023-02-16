@@ -13,11 +13,11 @@ from pyrogram.types import (
 )
 from pyrogram.errors import FloodWait
 from handlers.helpers import str_to_b64
-
-
+from handlers.MultiChannel import get_db_channel,get_db_indentity
 async def forward_to_channel(bot: Client, message: Message, editable: Message):
     try:
-        __SENT = await message.copy(Config.DB_CHANNEL)
+        DB_CHANNEL = await get_db_channel()
+        __SENT = await message.copy(DB_CHANNEL)
         return __SENT
     except FloodWait as sl:
         if sl.value > 45:
@@ -37,6 +37,8 @@ async def forward_to_channel(bot: Client, message: Message, editable: Message):
 
 async def save_batch_media_in_channel(bot: Client, editable: Message, message_ids: list):
     try:
+        DB_CHANNEL = await get_db_channel()
+        DB_Identity = await get_db_indentity()
         message_ids_str = ""
         message_cap =""
         thumbnail_id =""
@@ -57,14 +59,14 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
             if cap01:
                 cap = await rmw(cap01)
                 if cap != cap01:
-                    await bot.edit_message_caption(Config.DB_CHANNEL,sent_message.id,f"{cap}")
+                    await bot.edit_message_caption(DB_CHANNEL,sent_message.id,f"{cap}")
             else:
                 cap = "file don't have caption 🤥"
             message_cap += f"<b>{i}</b>: {cap}\n\n"
             i += 1
             await asyncio.sleep(2)
         SaveMessage = await bot.send_message(
-            chat_id=Config.DB_CHANNEL,
+            chat_id=DB_CHANNEL,
             text=message_ids_str,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([[
@@ -72,10 +74,10 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
             ]])
         )
         if Config.SHORT_SINGLE_LINK:
-            share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}")
+            share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(str(SaveMessage.id))}")
         else:
-            share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}"
-        org_share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(str(SaveMessage.id))}"
+            share_link = f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(str(SaveMessage.id))}"
+        org_share_link = f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(str(SaveMessage.id))}"
         await editable.edit(
             #f"**Batch Files Stored in my Database!**\n\n
             f"Here is the Permanent Link of your files: {share_link} \n\n"
@@ -122,13 +124,15 @@ async def save_batch_media_in_channel(bot: Client, editable: Message, message_id
 
 async def save_media_in_channel(bot: Client, editable: Message, message: Message):
     try:
-        forwarded_msg = await message.copy(Config.DB_CHANNEL)
+        DB_CHANNEL = await get_db_channel()
+        DB_Identity = await get_db_indentity()
+        forwarded_msg = await message.copy(DB_CHANNEL)
         cap01 = forwarded_msg.caption
         #print(message.video.thumbs[0].file_id)
         if cap01:
             cap = await rmw(cap01)
             if cap != cap01:
-                await bot.edit_message_caption(Config.DB_CHANNEL,forwarded_msg.id,f"{cap}")
+                await bot.edit_message_caption(DB_CHANNEL,forwarded_msg.id,f"{cap}")
         else:
             cap = "file don't have any caption 😟"
         file_er_id = str(forwarded_msg.id)           
@@ -136,10 +140,10 @@ async def save_media_in_channel(bot: Client, editable: Message, message: Message
 #             f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!",
 #             disable_web_page_preview=True)
         if Config.SHORT_SINGLE_LINK:
-            share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}")
+            share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(file_er_id)}")
         else:
-            share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
-        org_share_link = f"https://t.me/{Config.BOT_USERNAME}?start=storebot_{str_to_b64(file_er_id)}"
+            share_link = f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(file_er_id)}"
+        org_share_link = f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(file_er_id)}"
         await forwarded_msg.reply_text(
             f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!\nLink 👉👉👉{share_link}",
             disable_web_page_preview=True,reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Open Link", url=org_share_link)]]))
