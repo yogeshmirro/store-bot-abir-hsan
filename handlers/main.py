@@ -43,7 +43,7 @@ from handlers.save_media import (
     save_media_in_channel,
     save_batch_media_in_channel
 )
-from handlers.MultiChannel import change_db_channel,get_db_dict,get_db_channel,get_db_indentity
+from handlers.MultiChannel import change_db_channel,get_db_dict,get_db_channel,get_db_indentity,current_db_channel
 MediaList = {}
 
 @Bot.on_message(filters.private)
@@ -80,17 +80,7 @@ async def start(bot: Client, cmd: Message):
         )
     else:
         value = (cmd.text).split("_",1)[0].split()[-1]
-        DBChannelDict = await get_db_dict()
-        for i in DBChannelDict:
-            if value == DBChannelDict[i]:
-                DB_CHANNEL = int(i)
-                break
-            else:
-                DB_CHANNEL = None
-        if DB_CHANNEL is None:
-            await cmd.reply_text("**You Give Me Wrong Link👎**\nPlz Give Me Correct Link🤗")
-            return
-        if Config.EARNING:
+        if Config.EARNING=="True":
             date_format = "%Y-%m-%d"
             current_date = datetime.strptime(date.today().isoformat(),date_format)
             user_date = datetime.strptime(await db.verify_status(cmd.from_user.id),date_format)
@@ -104,7 +94,7 @@ async def start(bot: Client, cmd: Message):
                         await bot.send_message(cmd.from_user.id,"💥Verification Complete💥")
                         return
                     except Exception as err:
-                        await cmd.reply_text(f"Something went wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
+                        await cmd.reply_text(f"Something Went Wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
                         return
                 else:
                     try:
@@ -120,7 +110,7 @@ async def start(bot: Client, cmd: Message):
                             await bot.send_message(cmd.from_user.id,f"<b>This Verification Link Expired🚫\nPlz Verify by This New Link👉👉</b>\n{shorted_link}\n🥁<i>Once You Verify, Your Verification Valid Till Next {Config.VERIFY_DURATION} Days</i>🥁\nHow To Verify👉👉{Config.HOW_TO_VERIFY_LINK}")
                             return
                     except Exception as err:
-                        await cmd.reply_text(f"Something went wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
+                        await cmd.reply_text(f"Something Went Wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
                         return
             if diff<=int(Config.VERIFY_DURATION):
                 try:
@@ -128,9 +118,13 @@ async def start(bot: Client, cmd: Message):
                         file_id = int(b64_to_str(usr_cmd).split("_")[-1])
                     except (Error, UnicodeDecodeError):
                         file_id = int(usr_cmd.split("_")[-1])
+                    DB_CHANNEL = await current_db_channel(value)
+                    if DB_CHANNEL is None:
+                        await cmd.reply_text("**You Give Me Wrong Link👎**\nPlz Give Me Correct Link🤗")
+                        return
                     GetMessage = await bot.get_messages(chat_id=DB_CHANNEL, message_ids=file_id)
                     message_ids = []
-                    if GetMessage.text:
+                    if GetMessage.reply_markup:
                         message_ids = GetMessage.text.split(" ")
                         _response_msg = await cmd.reply_text(
                         text=f"**Total Files:** `{len(message_ids)}`",
@@ -140,9 +134,9 @@ async def start(bot: Client, cmd: Message):
                     else:
                         message_ids.append(int(GetMessage.id))
                     for i in range(len(message_ids)):
-                        await send_media_and_reply(bot, user_id=cmd.from_user.id, file_id=int(message_ids[i]))
+                        await send_media_and_reply(bot, user_id=cmd.from_user.id, file_id=int(message_ids[i]), chat_id=DB_CHANNEL)
                 except Exception as err:
-                    await cmd.reply_text(f"Something went wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
+                    await cmd.reply_text(f"Something Went Wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
             else:
                 try:
                     if Config.VERIFY_KEY:
@@ -156,13 +150,17 @@ async def start(bot: Client, cmd: Message):
                         shorted_link = await linkshort.Short(f"{to_be_short}")
                         await bot.send_message(cmd.from_user.id,f"<b>you are not verifed🚫\nplz verify by this Link👉👉</b>\n{shorted_link}\n🥁<i>Once you verify, your verification valid till next {Config.VERIFY_DURATION} days</i>🥁\nHow To Verify👉👉{Config.HOW_TO_VERIFY_LINK}")
                 except Exception as err:
-                    await cmd.reply_text(f"Something went wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
+                    await cmd.reply_text(f"Something Went Wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
         else:
             try:
                 try:
                     file_id = int(b64_to_str(usr_cmd).split("_")[-1])
                 except (Error, UnicodeDecodeError):
                     file_id = int(usr_cmd.split("_")[-1])
+                DB_CHANNEL = await current_db_channel(value)
+                if DB_CHANNEL is None:
+                    await cmd.reply_text("**You Give Me Wrong Link👎**\nPlz Give Me Correct Link🤗")
+                    return
                 GetMessage = await bot.get_messages(chat_id=DB_CHANNEL, message_ids=file_id)
                 message_ids = []
                 if GetMessage.reply_markup:
@@ -177,9 +175,9 @@ async def start(bot: Client, cmd: Message):
                 for i in range(len(message_ids)):
                     await send_media_and_reply(bot, user_id=cmd.from_user.id, file_id=int(message_ids[i]), chat_id = DB_CHANNEL)
             except Exception as err:
-                await cmd.reply_text(f"Something went wrong!\n\n**Error:** `{err}`")
+                await cmd.reply_text(f"Something Went Wrong, Plz 🙏 Forward This Error To Bot Owner!\n\n**Error:** `{err}`")
 
-@Bot.on_message((filters.user(Config.BOT_OWNER) & filters.incoming) & ~filters.chat(Config.DB_CHANNELS) & ~filters.command(['start','broadcast','clear_batch','ban_user','unban_user','banned_users','status','change_db_channel']))
+@Bot.on_message(filters.incoming & ~filters.chat(Config.DB_CHANNELS) & ~filters.command(['start','broadcast','clear_batch','ban_user','unban_user','banned_users','status','change_db_channel']))
 async def main(bot: Client, message: Message):
     DB_CHANNEL = await get_db_channel()
     DB_Identity = await get_db_indentity()
@@ -197,7 +195,7 @@ async def main(bot: Client, message: Message):
                                      disable_web_page_preview=True)
             return
 
-        if Config.OTHER_USERS_CAN_SAVE_FILE is False:
+        if Config.OTHER_USERS_CAN_SAVE_FILE=="False":
             return
 
         await message.reply_text(
@@ -221,7 +219,7 @@ async def main(bot: Client, message: Message):
         try:
             forwarded_msg = await message.forward(DB_CHANNEL)
             file_er_id = str(forwarded_msg.id)
-            if Config.SHORT_SINGLE_LINK:
+            if Config.SHORT_SINGLE_LINK=="True":
                 share_link = await linkshort.Short(f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(file_er_id)}")
             else:
                 share_link = f"https://t.me/{Config.BOT_USERNAME}?start={DB_Identity}_{str_to_b64(file_er_id)}"
