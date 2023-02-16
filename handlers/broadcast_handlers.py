@@ -21,9 +21,9 @@ broadcast_ids = {}
 
 async def send_msg(user_id, message):
     try:
-        if Config.BROADCAST_AS_COPY is False:
+        if Config.BROADCAST_AS_COPY=="False":
             await message.forward(chat_id=user_id)
-        elif Config.BROADCAST_AS_COPY is True:
+        elif Config.BROADCAST_AS_COPY=="True":
             await message.copy(chat_id=user_id)
         return 200, None
     except FloodWait as e:
