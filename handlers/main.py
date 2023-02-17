@@ -195,7 +195,7 @@ async def main(bot: Client, message: Message):
                                      disable_web_page_preview=True)
             return
 
-        if Config.OTHER_USERS_CAN_SAVE_FILE=="False":
+        if Config.OTHER_USERS_CAN_SAVE_FILE=="False" and int(m.from_user.id)!=Config.BOT_OWNER:
             return
 
         await message.reply_text(
